@@ -67,6 +67,66 @@ class Battlesnake(object):
     @cherrypy.expose
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
+    def move(self):
+        # This function is called on every turn of a game. It's how your snake decides where to move.
+        # Valid moves are "up", "down", "left", or "right".
+        # TODO: Use the information in cherrypy.request.json to decide your next move.
+        data = cherrypy.request.json
+
+        move = "none"
+        # Choose a random direction to move in
+        head = data['you']['body'][0]
+        possible_moves = possible_movez(head)
+        directions=["left", "right", "up", "down"]
+        for move in possible_moves:
+            if possible_movez(next_pos(head,move)) ==[]:
+                possible_moves.remove(move)
+        #move = random.choice(possible_moves)
+        dict={}
+        food = "false"
+        for mv in possible_moves:
+            if next_pos(head, mv) in data['board']['food']:
+                move = mv
+                food = "true"
+        
+        if food =="false":
+            for mv in possible_moves:
+                i=0
+                if mv =="up":
+                    head1=head.copy()
+                    head1['y']-=1
+                    while next_pos(head1,mv) in open_spaces(data):
+                        head1['y']-=1
+                        i+=1
+                elif mv =="down":
+                    head2=head.copy()
+                    head2['y']+=1
+                    while next_pos(head2,mv) in open_spaces(data):
+                        head2['y']+=1
+                        i+=1
+                elif mv =="left":
+                    head3=head.copy()
+                    head3['x']-=1
+                    while next_pos(head3,mv) in open_spaces(data):
+                        head3['x']-=1
+                        i+=1
+                elif mv =="right":
+                    head4=head.copy()
+                    head4['x']+=1
+                    while next_pos(head4,mv) in open_spaces(data):
+                        head4['x']+=1
+                        i+=1
+                dict[mv]=i
+        move = max(dict, key=lambda key: dict[key])
+
+    #repeat for other directions
+    #out of the remaining directions, choose the one that gives the most distance from a wall or from another snake.
+    #if one space away from food, get the food
+    
+    
+        print(f"MOVE: {move}")
+        return {"move": move}
+
     @cherrypy.expose
     @cherrypy.tools.json_in()
     def end(self):
